@@ -136,7 +136,7 @@ code_change(_, State, _) -> {ok, State}.
 
 process_job(JobId, JobSpec, ServerPid) ->
     %% Simulate a long running job
-    timer:sleep(1000), %% Sleep for 1 second for testing purposes
     Result = task_sorter:sort(JobSpec),
+    timer:sleep(1000), %% Sleep for 1 second for testing purposes
     ServerPid ! {job_done, JobId, Result},
     ok.

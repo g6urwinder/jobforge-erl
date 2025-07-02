@@ -3,11 +3,6 @@
 
 -export([init/2]).
 
-tasks_to_bash(Tasks) ->
-    lists:foldl(fun(Task, Acc) ->
-        [maps:get(<<"command">>, Task) | Acc ]
-     end, [], Tasks).
-
 init(Req, State) ->
     Method = cowboy_req:method(Req),
     Path = cowboy_req:path(Req),
