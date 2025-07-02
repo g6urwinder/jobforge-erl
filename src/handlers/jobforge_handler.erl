@@ -30,8 +30,13 @@ init(Req, State) ->
                                     Req2 = cowboy_req:reply(201, #{<<"content-type">> => <<"application/json">>}, RespJson, Req1),
                                     {ok, Req2, State}
                             end;
+                        {error, {cycle_detected, TaskName}} ->
+                            ErrorMsg = jsx:encode(#{error => <<"Cyclic dependency detected">>, task => TaskName}),
+                            Req2 = cowboy_req:reply(400, #{<<"content-type">> => <<"application/json">>}, ErrorMsg, Req1),
+                            {ok, Req2, State};
                         {error, Reason} ->
-                            Req2 = cowboy_req:reply(500, #{<<"content-type">> => <<"application/json">>}, jsx:encode(#{error => Reason}), Req1),
+                            ErrorMsg = jsx:encode(#{error => Reason}),
+                            Req2 = cowboy_req:reply(400, #{<<"content-type">> => <<"application/json">>}, ErrorMsg, Req1),
                             {ok, Req2, State}
                     end
             catch

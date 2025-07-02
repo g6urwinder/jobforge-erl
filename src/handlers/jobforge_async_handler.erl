@@ -30,12 +30,23 @@ init(Req, State) ->
                     Req2 = cowboy_req:reply(400, #{"content-type" => "application/json"}, <<"Missing job id">>, Req),
                     {ok, Req2, State};
                 JobId ->
-                    {Status, {ok, Result}} = jobforge_job_server:result(binary_to_list(JobId)),
-                    io:format("Status: ~p, Result: ~p~n", [Status, Result]),
-                    BashScript = handlers_utils:tasks_to_bash(Result),
-                    Resp = jsx:encode(#{status => Status, result => BashScript}),
-                    Req2 = cowboy_req:reply(200, #{"content-type" => "application/json"}, Resp, Req),
-                    {ok, Req2, State}
+                    {Status, Result} = jobforge_job_server:result(binary_to_list(JobId)),
+                    case Result of
+                        {error, {cycle_detected, TaskName}} ->
+                            ErrorMsg = jsx:encode(#{error => <<"Cyclic dependency detected">>, task => TaskName}),
+                            Req2 = cowboy_req:reply(400, #{"content-type" => "application/json"}, ErrorMsg, Req),
+                            {ok, Req2, State};
+                        {error, Reason} ->
+                            ErrorMsg = jsx:encode(#{error => Reason}),
+                            Req2 = cowboy_req:reply(400, #{"content-type" => "application/json"}, ErrorMsg, Req),
+                            {ok, Req2, State};
+                        _ ->
+                            io:format("Status: ~p, Result: ~p~n", [Status, Result]),
+                            BashScript = handlers_utils:tasks_to_bash(Result),
+                            Resp = jsx:encode(#{status => Status, result => BashScript}),
+                            Req2 = cowboy_req:reply(200, #{"content-type" => "application/json"}, Resp, Req),
+                            {ok, Req2, State}
+                    end
             end;
         _ ->
             Req2 = cowboy_req:reply(405, #{"content-type" => "text/plain"}, <<"Method Not Allowed">>, Req),
