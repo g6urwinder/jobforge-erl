@@ -1,8 +1,8 @@
--module(jobforge_job_v1).
+-module(jobforge_job).
 -export([process/1]).
 
 process(#{<<"tasks">> := Tasks}) when is_list(Tasks) ->
-    case task_sorter_v2:sort(Tasks) of
+    case task_sorter:sort(Tasks) of
         {error, Reason} ->
             {error, Reason};
         {ok, SortedTasks} ->

@@ -1,0 +1,33 @@
+%% Jobforge System Architecture - Mermaid Diagrams
+
+%% Component Diagram
+%% Shows the main modules and their relationships
+---
+%% Component Diagram
+```mermaid
+graph TD
+    Client[Client]
+    JobServer[jobforge_job_server]
+    Backend[Backend (Queue/RabbitMQ/Kafka)]
+    ETS[ETS Table]
+    Worker[Worker Process]
+    Sorter[task_sorter]
+
+    Client --> JobServer
+    JobServer --> Backend
+    JobServer --> ETS
+    JobServer --> Worker
+    Worker --> Sorter
+```
+
+---
+
+%% State Diagram
+%% Shows the lifecycle of a job
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Running: Slot available
+    Running --> Completed: Success
+    Running --> Error: Failure
+``` 

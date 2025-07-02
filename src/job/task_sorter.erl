@@ -1,4 +1,4 @@
--module(task_sorter_v2).
+-module(task_sorter).
 -export([sort/1]).
 
 %% Definition of tasks is

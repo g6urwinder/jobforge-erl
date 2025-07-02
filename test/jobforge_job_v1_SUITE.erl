@@ -1,9 +1,9 @@
--module(jobforge_job_v1_SUITE).
+-module(jobforge_job_SUITE).
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
 -include_lib("kernel/include/file.hrl").
 
-%%% In jobforge_job_v1_SUITE.erl
+%%% In jobforge_job_SUITE.erl
 all() -> [multiple_roots, linear_chain, diamond, large_acyclic, large_cycle, simple_acyclic, simple_cycle, independent_chains, missing_dependency, empty_list, single_task, self_cycle].
 
 multiple_roots(_Config) ->
@@ -13,7 +13,7 @@ multiple_roots(_Config) ->
         #{<<"name">> => <<"C">>, <<"command">> => <<"echo C">>, <<"requires">> => [<<"A">>, <<"B">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = jobforge_job_v1:process(Input),
+    Result = jobforge_job:process(Input),
     case Result of
         {ok, Sorted} ->
             Names = [maps:get(<<"name">>, T) || T <- Sorted],
@@ -32,7 +32,7 @@ linear_chain(_Config) ->
         #{<<"name">> => <<"C">>, <<"command">> => <<"echo C">>, <<"requires">> => [<<"B">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = jobforge_job_v1:process(Input),
+    Result = jobforge_job:process(Input),
     case Result of
         {ok, [A, B, C]} ->
             Names = [maps:get(<<"name">>, A), maps:get(<<"name">>, B), maps:get(<<"name">>, C)],
@@ -51,7 +51,7 @@ diamond(_Config) ->
         #{<<"name">> => <<"D">>, <<"command">> => <<"echo D">>, <<"requires">> => [<<"B">>, <<"C">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = jobforge_job_v1:process(Input),
+    Result = jobforge_job:process(Input),
     case Result of
         {ok, Sorted} ->
             Names = [maps:get(<<"name">>, T) || T <- Sorted],
@@ -70,7 +70,7 @@ simple_acyclic(_Config) ->
         #{<<"name">> => <<"C">>, <<"command">> => <<"echo C">>, <<"requires">> => [<<"B">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {ok, Sorted} when length(Sorted) =:= 3 -> ok;
         _ -> ct:fail({unexpected_result, Result})
@@ -82,7 +82,7 @@ simple_cycle(_Config) ->
         #{<<"name">> => <<"B">>, <<"command">> => <<"echo B">>, <<"requires">> => [<<"A">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {error, {cycle_detected, _}} -> ok;
         _ -> ct:fail({unexpected_result, Result})
@@ -96,7 +96,7 @@ independent_chains(_Config) ->
         #{<<"name">> => <<"D">>, <<"command">> => <<"echo D">>, <<"requires">> => [<<"C">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     io:format("Result: ~p~n", [Result]),
     case Result of
         {ok, Sorted} when length(Sorted) =:= 4 -> ok;
@@ -108,7 +108,7 @@ missing_dependency(_Config) ->
         #{<<"name">> => <<"A">>, <<"command">> => <<"echo A">>, <<"requires">> => [<<"B">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {error, _} -> ok; % You may want to check for a specific error
         _ -> ct:fail({unexpected_result, Result})
@@ -116,7 +116,7 @@ missing_dependency(_Config) ->
 
 empty_list(_Config) ->
     Input = #{<<"tasks">> => []},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {ok, []} -> ok;
         _ -> ct:fail({unexpected_result, Result})
@@ -127,7 +127,7 @@ single_task(_Config) ->
         #{<<"name">> => <<"A">>, <<"command">> => <<"echo A">>, <<"requires">> => []}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {ok, [Task]} ->
             case maps:get(<<"name">>, Task) of
@@ -142,7 +142,7 @@ self_cycle(_Config) ->
         #{<<"name">> => <<"A">>, <<"command">> => <<"echo A">>, <<"requires">> => [<<"A">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = task_sorter_v2:sort(Input),
+    Result = task_sorter:sort(Input),
     case Result of
         {error, {cycle_detected, <<"A">>}} -> ok;
         _ -> ct:fail({unexpected_result, Result})
@@ -155,7 +155,7 @@ large_cycle(_Config) ->
         #{<<"name">> => <<"C">>, <<"command">> => <<"echo C">>, <<"requires">> => [<<"A">>]}
     ],
     Input = #{<<"tasks">> => Tasks},
-    Result = jobforge_job_v1:process(Input),
+    Result = jobforge_job:process(Input),
     case Result of
         {error, _} -> ok;  % or {err, _} if that's your convention
         _ -> ct:fail({unexpected_result, Result})
@@ -166,7 +166,7 @@ large_acyclic(_Config) ->
     Input = #{<<"tasks">> => Tasks},
     ct:pal("Generated Tasks List of length ~p~n", [length(Tasks)]),
     Start = os:timestamp(),
-    Result = jobforge_job_v1:process(Input),
+    Result = jobforge_job:process(Input),
     End = os:timestamp(),
     ElapsedMicroSecs = timer:now_diff(End, Start),
     ElapsedMillis = ElapsedMicroSecs div 1000,

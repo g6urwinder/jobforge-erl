@@ -6,9 +6,9 @@
 routes() ->
     cowboy_router:compile([
         {'_', [
-            {"/v1/job", jobforge_handler_v1, []},
-            {"/v1/job/bash", jobforge_handler_v1, []},
-            {"/v3/job/async", jobforge_async_handler, []},
-            {"/v3/job/result/:id", jobforge_async_handler, []}
+            {"/syncjob", jobforge_handler, []},
+            {"/syncjob/bash", jobforge_handler, []},
+            {"/asyncjob", jobforge_async_handler, []},
+            {"/asyncjob/result/:id", jobforge_async_handler, []}
         ]}
     ]).
