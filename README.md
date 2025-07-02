@@ -19,6 +19,27 @@ Jobforge is designed as a modular, extensible job processing system. At its core
 ![Jobforge workflow](docs/workflow-diagram.png)
 *Figure: High-level component and workflow diagram of the Jobforge system.*
 
+## Task Sorting Algorithm
+
+Jobforge uses a custom topological sort implemented in the `task_sorter` module to order tasks based on their dependencies.
+
+- Each task can specify a list of other tasks it depends on (`requires`).
+- The sorter traverses the dependency graph using depth-first search (DFS).
+- It detects cycles and missing dependencies, returning an error if found.
+- The result is a list of tasks in the correct execution order, so that all dependencies are satisfied before a task runs.
+
+### Example
+
+If you submit these tasks:
+- task-1 (no dependencies)
+- task-2 (depends on task-3)
+- task-3 (depends on task-1)
+
+The sorted order will be: task-1, task-3, task-2.
+
+![Sorting](docs/sorting.png)
+*Figure: High-level detail of sorting algorithm
+
 ## Pluggable Backend
 
 The job queueing mechanism is abstracted behind a backend interface. By default, an in-memory queue is used, but you can implement and configure other backends (e.g., RabbitMQ, Kafka, Redis Streams).
