@@ -249,6 +249,14 @@ curl http://localhost:8080/asyncjob/result/eec40d42-e812-4ec2-b174-eedbec046e51
 
 *The async API allows you to submit a job and poll for its result using the returned job id.*
 
+### Errors
+
+If cyclic dependency is found it should return this error
+
+```
+{"error":"Cyclic dependency detected","task":"task-1"}
+```
+
 ## Performance & Load Testing
 
 This project includes a large-scale test to demonstrate performance and scalability.
