@@ -49,8 +49,6 @@ handle_call({process, JobSpec}, _From, #state{running = Running, limit = Limit, 
     JobId = uuid:uuid_to_string(uuid:get_v4()),
     ets:insert(?TABLE, {JobId, #{status => pending, spec => JobSpec}}),
     ServerPid = self(),
-    io:format("Running: ~p~n", [Running]),
-    io:format("Limit: ~p~n", [Limit]),
     case maps:size(Running) < Limit of
         true ->
             Pid = spawn_link(fun() -> process_job(JobId, JobSpec, ServerPid) end),
@@ -72,7 +70,6 @@ handle_call({process, JobSpec}, _From, #state{running = Running, limit = Limit, 
             }}
     end;
 handle_call({result, JobId}, _From, State) ->
-    io:format("Finding Result for Job: ~p~n", [JobId]),
     case ets:lookup(?TABLE, JobId) of
         [{JobId, JobMap}] ->
             Status = maps:get(status, JobMap, undefined),
@@ -93,7 +90,6 @@ handle_call(_, _From, State) ->
 handle_cast(_, State) -> {noreply, State}.
 
 handle_info({job_done, JobId, Result}, #state{running = Running, running_count = RunningCount, completed_count = Completed, pending_count = Pending} = State) ->
-    io:format("Job done: ~p, Result: ~p~n", [JobId, Result]),
     ServerPid = self(),
     %% Update ETS with result
     case ets:lookup(?TABLE, JobId) of
@@ -139,10 +135,8 @@ terminate(_, _) -> ok.
 code_change(_, State, _) -> {ok, State}.
 
 process_job(JobId, JobSpec, ServerPid) ->
-    io:format("Processing job ~p~n", [JobId]),
     %% Simulate a long running job
     timer:sleep(1000), %% Sleep for 1 second for testing purposes
     Result = task_sorter:sort(JobSpec),
-    io:format("Job ~p result: ~p~n", [JobId, Result]),
     ServerPid ! {job_done, JobId, Result},
     ok.
