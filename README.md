@@ -65,7 +65,6 @@ Returns a map like:
 ```erlang
 #{pending_count => 0, running_count => 0, completed_count => 0, total_submitted => 0}
 ```
-```
 
 
 ## Build & Run
